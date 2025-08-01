@@ -103,6 +103,7 @@ def parseArgs():
     outputSettings.add_argument('--verbose', action='store_true', dest='verbose', help='Verbose output (disables plots)')
     outputSettings.add_argument('--dont-show-report', action='store_true', dest='dontShowReport', help='Do not show the report on screen after calibration.')
     outputSettings.add_argument('--export-poses', action='store_true', dest='exportPoses', help='Export the optimized poses into a CSV (time_ns, position, quaterion)')
+    outputSettings.add_argument('--export-reproj-error', action='store_true', dest='exportReporjectionErrors', help='Export the final reprojection errors (cam_id, image_id, rerr_x, rerr_y)')
 
     #print help if no argument is specified
     if len(sys.argv)==1:
@@ -242,7 +243,16 @@ def main():
         util.exportPoses(iCal, filename=posesFile)
         print("  Poses written to {0}".format(posesFile))
         print("")
-
+    
+    if parsed.exportReporjectionErrors:
+        reprojectionErrorFile = bagtag + "-reprojection-errors.csv"
+        print("Exporting reprojection errors", reprojectionErrorFile)
+        util.exportReporjectionErrors(iCal, filename=reprojectionErrorFile) 
+        frameTimeStampsFile = bagtag + "-frame-timestamps.csv"
+        print("Exporting camera frame times", frameTimeStampsFile)
+        util.exportFrameTimeStamps(iCal, filename=frameTimeStampsFile)
+        
+        
 if __name__ == "__main__":
     main()
 #     try:

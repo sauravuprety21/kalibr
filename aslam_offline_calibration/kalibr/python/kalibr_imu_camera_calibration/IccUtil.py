@@ -260,6 +260,37 @@ def generateReport(cself, filename="report.pdf", showOnScreen=True):
     if showOnScreen:
         plotter.show()
 
+def exportReporjectionErrors(cself, filename='reprojection_errors.csv'):
+    if cself.CameraChain:   
+        f = open(filename, 'w')
+        print("cam_id,image_id,rerrx,rerry", file=f)    
+         
+        for cidx, cam in enumerate(cself.CameraChain.camList):
+            for image_id, rerrs_image in enumerate(cam.allReprojectionErrors):
+                rerrs = np.array([rerr.error() for rerr in rerrs_image])
+                for row in rerrs:
+                    print("{:02d},".format(cidx) + \
+                        "{:02d},".format(image_id) + \
+                        "{:02.4f},".format(row[0]) + \
+                        "{:02.4f},".format(row[1]), file=f)
+        f.close()                   
+
+def exportFrameTimeStamps(cself, filename='frame_timestamps.csv'):
+    if cself.CameraChain:
+        f = open(filename, 'w')
+        print("cam_id,time_sec,time_ns", file=f)
+        obs_timestamps = set()
+        for cidx, cam in enumerate(cself.CameraChain.camList):
+            for obs in cam.targetObservations:
+                frameTime = obs.time()
+                obs_timestamps.add((cidx, frameTime.sec, frameTime.nsec))
+        
+        for cidx, frameTimeSec, frameTimeNsec in obs_timestamps:
+            print("{:02d},".format(cidx) + \
+            "{:010d},".format(frameTimeSec,) + \
+            "{:010d},".format(frameTimeNsec), file=f)
+        f.close()
+
 def exportPoses(cself, filename="poses_imu0.csv"):
     
     # Append our header, and select times at IMU rate
