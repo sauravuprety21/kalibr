@@ -269,6 +269,10 @@ class IccCamera():
         
         #store the timeshift (t_imu = t_cam + timeshiftCamToImuPrior)
         self.timeshiftCamToImuPrior = shift
+        self.timeshiftCamToImuPrior_times = [time - t[0] for time in t]
+        self.timeshiftCamToImuPrior_omega_measured_norm = omega_measured_norm
+        self.timeshiftCamToImuPrior_omega_predicted_norm = omega_predicted_norm
+        self.timeshiftCamToImuPrior_imuTimes = [time - times[0] for time in times]
         
         print("  Time shift camera to imu (t_imu = t_cam + shift):")
         print(self.timeshiftCamToImuPrior)

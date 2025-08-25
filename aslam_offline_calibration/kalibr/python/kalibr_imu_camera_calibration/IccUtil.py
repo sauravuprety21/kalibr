@@ -250,6 +250,20 @@ def generateReport(cself, filename="report.pdf", showOnScreen=True):
             plotter.add_figure(title, f)
             figs.append(f)
             offset += len(cself.CameraChain.camList)
+            
+            f = pl.figure(offset+cidx)
+            title="cam{0}: timeshift prior rotation norm alignment".format(cidx);
+            plots.plotCamToImuTimeShiftPriorOmegaNorm(cself, cidx, fno=f.number, noShow=True, title=title)
+            plotter.add_figure(title, f)
+            figs.append(f)
+            offset += len(cself.CameraChain.camList)
+            
+            f = pl.figure(offset+cidx)
+            title="cam{0}: timeshift prior cross correlation".format(cidx);
+            plots.plotCamToImuTimeShiftPriorCrossCorr(cself, cidx, fno=f.number, noShow=True, title=title)
+            plotter.add_figure(title, f)
+            figs.append(f)
+            offset += len(cself.CameraChain.camList)
 
     #write to pdf
     pdf=PdfPages(filename)

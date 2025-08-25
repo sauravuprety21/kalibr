@@ -288,6 +288,77 @@ def plotReprojectionScatter(cself, cam_id, fno=1, clearFigure=True, noShow=False
     if not noShow:
         pl.show()
 
+def plotCamToImuTimeShiftPriorOmegaNorm(cself, cam_id, fno=1, clearFigure=True, noShow=False, title=''):
+    cam = cself.CameraChain.camList[cam_id]
+    #create figure
+    f = pl.figure(fno)
+    if clearFigure:
+        f.clf()
+    f.suptitle(title)
+    
+    
+    pl.plot(cam.timeshiftCamToImuPrior_times, cam.timeshiftCamToImuPrior_omega_measured_norm, 
+            color="black", lw=1.0, label="measured_raw")
+    pl.plot(cam.timeshiftCamToImuPrior_times, cam.timeshiftCamToImuPrior_omega_predicted_norm, 
+            color="green", linestyle='dashed', lw=1.0, label="predicted")
+    pl.plot(cam.timeshiftCamToImuPrior_times - cam.timeshiftCamToImuPrior,
+            cam.timeshiftCamToImuPrior_omega_measured_norm, 
+            color="blue", linestyle='dashed', lw=1.0, label="measured_corrected")
+    pl.grid('on')
+    pl.xlabel("time (s)")
+    pl.ylabel('ang. velocity norm ($rad/s$)')
+    pl.title('camera to imu time-shift prior')
+    pl.legend()
+
+    if not noShow:
+        pl.show()
+        
+def plotCamToImuTimeShiftPriorCrossCorr(cself, cam_id, fno=1, clearFigure=True, noShow=False, title=''):
+    cam = cself.CameraChain.camList[cam_id]
+    #create figure
+    f = pl.figure(fno)
+    if clearFigure:
+        f.clf()
+    f.suptitle(title)
+    
+    #get the time shift
+    corr = np.correlate(cam.timeshiftCamToImuPrior_omega_predicted_norm, cam.timeshiftCamToImuPrior_omega_measured_norm, "full")
+    discrete_shift = corr.argmax() - (np.size(cam.timeshiftCamToImuPrior_omega_measured_norm) - 1)
+
+    corr = corr  / (
+    np.linalg.norm(cam.timeshiftCamToImuPrior_omega_predicted_norm) *
+    np.linalg.norm(cam.timeshiftCamToImuPrior_omega_measured_norm))
+    lags = np.arange(-(len( cam.timeshiftCamToImuPrior_omega_measured_norm)-1), len(cam.timeshiftCamToImuPrior_omega_predicted_norm))
+
+    dT = np.mean(np.diff(cam.timeshiftCamToImuPrior_imuTimes ))
+    shift = -discrete_shift*dT
+    lags_sec = lags * dT
+
+    pl.subplot(2,1, 1)
+    pl.plot(lags_sec, corr, color='blue', lw=1.0)
+    pl.axvline(x=shift, color='r', linestyle='--', label=f'Estimated shift prior = {shift:.4f}s')
+    pl.axvline(x=shift, color='k', linestyle='--', label=f'Estimated shift = {cself.CameraChain.getResultTimeShift(cam_id):.8f}s')
+    pl.grid('on')
+    pl.ylabel('normalized correlation')
+    pl.legend()
+    
+    pl.subplot(2,1, 2)
+    pl.plot(lags_sec, corr, color='blue', lw=1.0)
+    pl.axvline(x=shift, color='r', linestyle='--')
+    pl.axvline(x=shift, color='k', linestyle='--')
+    ax = pl.gca()
+    xdata = np.array(lags_sec)
+    ydata = np.array(corr)
+    y_visible = ydata[(xdata >= -0.05) & (xdata <= 0.05)]
+    ax.set_xlim(-0.05, 0.05)
+    ax.set_ylim(y_visible.min(), 1.000)
+    pl.grid('on')
+    pl.xlabel("time shift (s)")
+    pl.ylabel('normalized correlation')
+    
+    if not noShow:
+        pl.show()
+
 class CameraPlot:
     def __init__(self, fig,  targetPoints, camSize):
         self.initialized = False
