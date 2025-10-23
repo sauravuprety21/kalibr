@@ -344,8 +344,8 @@ def plotCamToImuTimeShiftPriorCrossCorr(cself, cam_id, fno=1, clearFigure=True, 
     
     pl.subplot(2,1, 2)
     pl.plot(lags_sec, corr, color='blue', lw=1.0)
-    pl.axvline(x=shift, color='r', linestyle='--')
-    pl.axvline(x=shift, color='k', linestyle='--')
+    # pl.axvline(x=shift, color='r', linestyle='--')
+    # pl.axvline(x=shift, color='k', linestyle='--')
     ax = pl.gca()
     xdata = np.array(lags_sec)
     ydata = np.array(corr)
